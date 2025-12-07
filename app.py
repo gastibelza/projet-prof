@@ -2,10 +2,14 @@ import streamlit as st
 import random
 import time
 
-# --- CONFIGURATION ---
+# --- CONFIGURATION AGILE (MODIFIER ICI CHAQUE JOUR) ---
+MOT_DE_PASSE_DU_JOUR = "MITOCHONDRIE"
+URL_PHOTO_DU_JOUR = "https://images.unsplash.com/photo-1512389142860-9c449e58a543?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80" # Photo de Noël générique
+
+# --- CONFIGURATION APP ---
 st.set_page_config(
-    page_title="SYSTEME P.R.O.F v2.4",
-    page_icon="🎄",
+    page_title="SYSTEME P.R.O.F v3.0 - SOUMAYYAT EDITION",
+    page_icon="🧬",
     layout="centered",
     initial_sidebar_state="collapsed"
 )
@@ -42,16 +46,12 @@ st.markdown("""
         border: 1px solid #00ff00;
         font-family: 'Courier New', Courier, monospace;
         width: 100%;
+        font-weight: bold;
     }
     .stButton > button:hover {
         background-color: #00ff00;
         color: #000000;
         box-shadow: 0 0 10px #00ff00;
-    }
-    
-    /* Sliders */
-    .stSlider > div > div > div > div {
-        background-color: #00ff00;
     }
     
     /* Success/Error/Info boxes */
@@ -62,116 +62,141 @@ st.markdown("""
     }
     
     /* Custom classes */
-    .hacker-text {
+    .matrix-text {
         font-family: 'Courier New', Courier, monospace;
         color: #00ff00;
+        font-size: 1.1em;
     }
-    .christmas-emoji {
-        font-size: 2em;
+    .highlight {
+        color: #ff00ff;
+        font-weight: bold;
     }
     </style>
     """, unsafe_allow_html=True)
 
 # --- STATE MANAGEMENT ---
-if 'logged_in' not in st.session_state:
-    st.session_state.logged_in = False
+if 'intro_shown' not in st.session_state:
+    st.session_state.intro_shown = False
 if 'gift_unlocked' not in st.session_state:
     st.session_state.gift_unlocked = False
 
-# --- DATA ---
-PHRASES_SVT = [
-    "Élève en dormance hivernale, réveil prévu au printemps.",
+# --- DATA: GÉNÉRATEUR SVT TURBO (50+ PHRASES) ---
+PHRASES_SVT_TURBO = [
     "Activité neuronale comparable à un lichen sur sol acide.",
-    "Aussi dynamique qu'une roche sédimentaire.",
-    "Tentative de photosynthèse en cours... échec critique.",
+    "Tentative de photosynthèse en cours... échec critique par manque de lumière.",
+    "Élève en dormance hivernale, réveil prévu au prochain millénaire.",
+    "Aussi dynamique qu'une roche sédimentaire au fond d'un lac.",
     "Métabolisme intellectuel proche du zéro absolu.",
     "Capacité de concentration inversement proportionnelle à la complexité du caryotype.",
     "Évolution darwinienne en pause indéterminée.",
     "Symbiose parfaite avec le radiateur du fond.",
-    "Réaction enzymatique lente, très lente...",
-    "Niveau d'énergie : fossile."
-]
-
-PRESCRIPTIONS_GEO = [
-    "ALERTE : Éruption imminente ! Évacuez les élèves vers la zone de subduction.",
-    "Stabilité précaire. Risque de séisme magnitude 8 sur l'échelle de Richter du stress.",
-    "Niveau de magma critique. Prescription : Chocolat en intraveineuse immédiate.",
-    "Calme plat. Plaque tectonique au repos. Profitez-en pour corriger 2 copies.",
-    "Pression modérée. Une tisane et ça repart comme une coulée de lave fluide."
+    "Réaction enzymatique lente, très lente... voire inexistante.",
+    "Niveau d'énergie : fossile.",
+    "Le phénotype 'je dors en cours' est clairement dominant.",
+    "Vitesse de sédimentation des connaissances : rapide.",
+    "Subduction de la motivation observée dès 8h05.",
+    "Activité sismique nulle : encéphalogramme plat.",
+    "Une mitose cellulaire a plus d'action que cet élève.",
+    "Absence totale de chlorophylle intellectuelle.",
+    "Le noyau cellulaire semble vide de toute information.",
+    "Migration des neurones vers le sud pour l'hiver.",
+    "Fossilisation en cours sur la chaise.",
+    "Dérive des continents attentionnels vers le smartphone.",
+    "Érosion rapide de la bonne volonté.",
+    "Un trilobite aurait plus de réactivité.",
+    "La sélection naturelle ne joue pas en sa faveur aujourd'hui.",
+    "Tentative de méiose ratée : on a perdu la moitié des informations.",
+    "Le cytoplasme est là, mais l'esprit est ailleurs.",
+    "Respiration cellulaire en mode économie d'énergie extrême.",
+    "Une fougère a plus d'interactions avec son environnement.",
+    "Cycle de Krebs bloqué à l'étape 'Sieste'.",
+    "L'ADN de cet élève code pour la procrastination.",
+    "Héritage génétique : 100% fatigue.",
+    "Mutation spontanée vers l'état végétatif.",
+    "Le complexe argilo-humique a plus de cohésion que ses idées.",
+    "Bilan carbone : rejette plus de CO2 qu'il n'absorbe de savoir.",
+    "Tectonique des plaques : ses paupières se ferment par subduction.",
+    "Un écosystème à lui tout seul, mais sans producteur primaire.",
+    "Niche écologique : le fond de la classe, près de la fenêtre.",
+    "Chaîne alimentaire : se nourrit exclusivement de rêves.",
+    "Biodiversité des excuses pour ne pas travailler : exceptionnelle.",
+    "Adaptation au milieu scolaire : échec.",
+    "Le génotype promettait, le phénotype déçoit.",
+    "Osmose inverse : le savoir sort au lieu de rentrer.",
+    "Turgescence nulle, plasmolyse totale de la motivation.",
+    "Stomates fermés, aucun échange gazeux avec le cours.",
+    "La sève brute ne monte pas jusqu'au cerveau.",
+    "Phototropisme négatif : fuit la lumière du tableau.",
+    "Reproduction asexuée de l'ennui.",
+    "Un virus latent est plus actif.",
+    "Le système immunitaire rejette toute forme de travail.",
+    "Homéostasie du sommeil parfaitement maintenue.",
+    "Réflexe myotatique absent lors de l'interrogation.",
+    "Synapse en grève illimitée.",
+    "Potentiel d'action : -70mV (repos total).",
+    "Cortex cérébral en vacances aux Bahamas.",
+    "Lobe frontal en maintenance technique."
 ]
 
 # --- MAIN APP ---
 
-def login_screen():
-    st.title("🔒 ACCÈS RESTREINT")
-    st.markdown("### Veuillez vous identifier")
+def show_intro():
+    st.title("🎄 SYSTEME P.R.O.F v3.0 🎅")
+    st.subheader("INITIALISATION DU PROTOCOLE 'LUTIN EN RETARD'...")
     
-    password = st.text_input("Mot de passe", type="password")
+    st.markdown("""
+    <div class="matrix-text">
+    > CONNECTION ÉTABLIE...<br>
+    > IDENTIFICATION : <b>SOUMAYYAT</b> (Professeur SVT - Niveau Expert)<br>
+    > STATUT DU LUTIN : <b>CRITIQUE</b><br>
+    > CAUSE : <b>BUG DANS LA MATRICE DE NOËL / PANNE DE RÉVEIL QUANTIQUE</b><br>
+    <br>
+    <i>"Désolé pour le retard, j'étais coincé dans une boucle temporelle entre le 24 et le 25 décembre. 
+    Mon traîneau a eu un problème de joint de culasse interdimensionnel. 
+    Mais me voilà ! Prêt à rattraper le temps perdu avec une efficacité redoutable."</i>
+    </div>
+    """, unsafe_allow_html=True)
     
-    if st.button("INITIALISER LA CONNEXION"):
-        if password == "MITOSE":
-            st.session_state.logged_in = True
-            st.success("ACCÈS AUTORISÉ. BIENVENUE AGENT SOUMAYYAT.")
-            time.sleep(1)
-            st.rerun()
-        else:
-            st.error("ACCÈS REFUSÉ. ERREUR DE RÉPLICATION.")
+    if st.button("ACCEPTER LES EXCUSES DU LUTIN"):
+        st.session_state.intro_shown = True
+        st.rerun()
 
 def main_app():
-    st.title("🎄 SYSTEME P.R.O.F v2.4 🎅")
+    st.title("🧬 P.R.O.F - SOUMAYYAT EDITION 🧬")
     st.markdown("---")
     
-    # Feature A: Mood Tracker
-    st.header("📊 ANALYSE SISMIQUE (Mood Tracker)")
+    # Feature B: Générateur de Bulletins TURBO
+    st.header("📝 GÉNÉRATEUR D'APPRÉCIATIONS 'TURBO SVT'")
+    st.markdown("*Algorithme calibré sur la fatigue de fin de trimestre.*")
     
-    col1, col2 = st.columns(2)
-    with col1:
-        magma = st.slider("Niveau de Magma (Colère)", 0, 100, 50)
-    with col2:
-        pression = st.slider("Pression Tectonique (Fatigue)", 0, 100, 50)
+    if st.button("GÉNÉRER UNE APPRÉCIATION CINGLANTE"):
+        with st.spinner("Analyse du spécimen en cours..."):
+            time.sleep(0.5)
+            phrase = random.choice(PHRASES_SVT_TURBO)
+            st.success(f"🗣️ {phrase}")
         
-    if st.button("ANALYSER L'ÉTAT GÉOLOGIQUE"):
-        with st.spinner("Calcul des contraintes tectoniques..."):
-            time.sleep(1.5)
-            prescription = random.choice(PRESCRIPTIONS_GEO)
-            st.info(f"📋 RÉSULTAT : {prescription}")
+    st.markdown("---")
+    
+    # Feature C: La Cachette (Rallye Photo)
+    st.header("🕵️‍♀️ RALLYE PHOTO : LA ZONE SECRÈTE")
+    st.markdown("Entre le mot de passe du jour pour révéler l'indice visuel.")
+    
+    password_input = st.text_input("MOT DE PASSE DU JOUR", type="password")
+    
+    if st.button("DÉCRYPTER L'INDICE"):
+        if password_input == MOT_DE_PASSE_DU_JOUR:
+            st.session_state.gift_unlocked = True
+            st.balloons()
+        else:
+            st.error("⛔ MOT DE PASSE INCORRECT. L'ADN NE CORRESPOND PAS.")
             
-    st.markdown("---")
-    
-    # Feature B: Générateur de Bulletins
-    st.header("📝 GÉNÉRATEUR D'APPRÉCIATIONS SVT")
-    st.markdown("*Pour les cas désespérés...*")
-    
-    if st.button("GÉNÉRER APPRÉCIATION"):
-        phrase = random.choice(PHRASES_SVT)
-        st.code(phrase, language="text")
-        
-    st.markdown("---")
-    
-    # Feature C: La Cachette
-    st.header("🎁 ZONE SECRÈTE")
-    
-    if not st.session_state.gift_unlocked:
-        code_secret = st.text_input("Code de déverrouillage (Indice : La vie)", type="password")
-        if st.button("DÉCRYPTER"):
-            if code_secret == "ADN":
-                st.session_state.gift_unlocked = True
-                st.balloons()
-                st.rerun()
-            else:
-                st.error("CODE INCORRECT. MUTATION DÉTECTÉE.")
-    else:
-        st.success("🔓 ACCÈS DÉVERROUILLÉ !")
-        st.markdown("""
-            <div style="border: 2px solid #00ff00; padding: 20px; border-radius: 10px; text-align: center;">
-                <h2 style="color: #ff0000 !important;">🎅 CADEAU DÉTECTÉ 🎅</h2>
-                <p style="font-size: 1.5em;">Regarde derrière l'imprimante 3D du labo.</p>
-                <p>Joyeux Noël Soumayyat !</p>
-            </div>
-        """, unsafe_allow_html=True)
+    if st.session_state.gift_unlocked:
+        st.markdown("### 🎯 CIBLE DÉTECTÉE !")
+        st.image(URL_PHOTO_DU_JOUR, caption="L'indice se trouve ici...", use_container_width=True)
+        st.markdown(f"**Indice visuel chargé depuis :** `{URL_PHOTO_DU_JOUR}`")
 
 # --- ROUTING ---
-if not st.session_state.logged_in:
-    login_screen()
+if not st.session_state.intro_shown:
+    show_intro()
 else:
     main_app()
